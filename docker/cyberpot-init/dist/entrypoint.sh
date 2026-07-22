@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 COMPOSE="/tmp/cyberpot/docker-compose.yml"
-exec > >(tee /data/cyberpotinit.log) 2>&1
+exec > >(tee /data/cyberpot-init.log) 2>&1
 
 # Function to handle SIGTERM
 cleanup() {

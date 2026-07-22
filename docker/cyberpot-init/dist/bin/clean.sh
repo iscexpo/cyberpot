@@ -80,8 +80,8 @@ chown cyberpot:cyberpot $myADBHONEYDL $myCOWRIETTYLOGS $myCOWRIEDL $myDIONAEABI 
 logrotate -s $mySTATUS $myCONF
 }
 
-# Let's create a function to clean up and prepare cyberpotinit data
-fuCYPERPOTINIT () {
+# Let's create a function to clean up and prepare cyberpot-init data
+fuCYBERPOT_INIT () {
   mkdir -vp /data/ews/conf \
             /data/cyberpot/etc/{compose,logrotate} \
             /tmp/etc/
@@ -414,7 +414,7 @@ fi
 
 echo  
 echo "Checking and preparing data folders."
-fuCYPERPOTINIT
+fuCYBERPOT_INIT
 fuADBHONEY
 fuBEELZEBUB
 fuCISCOASA

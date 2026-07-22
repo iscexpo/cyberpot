@@ -20,6 +20,7 @@ networks:
   mailoney_local:
   medpot_local:
   miniprint_local:
+  rdphoneypot_local:
   redishoneypot_local:
   sentrypeer_local:
   tanner_local:
@@ -35,8 +36,8 @@ services:
 #########################################
 
 # CyberPot Init Service
-  cyberpotinit:
-    container_name: cyberpotinit
+  cyberpot-init:
+    container_name: cyberpot-init
     env_file:
       - .env
     restart: always
@@ -47,7 +48,7 @@ services:
     network_mode: "host"
     cap_add:
      - NET_ADMIN
-    image: ${CYBERPOT_REPO}/cyberpotinit:${CYBERPOT_VERSION}
+    image: ${CYBERPOT_REPO}/cyberpot-init:${CYBERPOT_VERSION}
     pull_policy: ${CYBERPOT_PULL_POLICY}
     volumes:
       - ${CYBERPOT_DOCKER_COMPOSE}:/tmp/cyberpot/docker-compose.yml:ro
@@ -271,6 +272,7 @@ services:
      - h0neytr4p_local
     ports:
       - "443:443"
+      - "2087:443"
     # - "80:80"
     image: ${CYBERPOT_REPO}/h0neytr4p:${CYBERPOT_VERSION}
     pull_policy: ${CYBERPOT_PULL_POLICY}
@@ -446,6 +448,24 @@ services:
      - ${CYBERPOT_DATA_PATH}/miniprint/log/:/opt/miniprint/log/
      - ${CYBERPOT_DATA_PATH}/miniprint/uploads/:/opt/miniprint/uploads/
 
+# RDPHoneypot service
+  rdphoneypot:
+    container_name: rdphoneypot
+    restart: always
+    depends_on:
+      logstash:
+        condition: service_healthy
+    networks:
+     - rdphoneypot_local
+    ports:
+     - "3389:3389"
+    image: ${CYBERPOT_REPO}/rdphoneypot:${CYBERPOT_VERSION}
+    pull_policy: ${CYBERPOT_PULL_POLICY}
+    read_only: true
+    volumes:
+     - ${CYBERPOT_DATA_PATH}/rdphoneypot/cert:/opt/rdphoneypot/cert
+     - ${CYBERPOT_DATA_PATH}/rdphoneypot/log:/opt/rdphoneypot/log
+
 # Redishoneypot service
   redishoneypot:
     container_name: redishoneypot
@@ -594,7 +614,7 @@ services:
     container_name: elasticsearch
     restart: always
     depends_on:
-      cyberpotinit:
+      cyberpot-init:
         condition: service_healthy
     environment:
      - bootstrap.memory_lock=true
