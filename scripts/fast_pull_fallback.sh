@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # fast_pull_fallback.sh - CyberPot docker-compose pull with fast registry fallback
-# Order: 1) ghcr.io/khulnasoft-bot  2) docker.io/khulnasoft  3) ghcr.io/khulnasoft
+# Order: 1) docker.io/khulnasoft  2) docker.io/khulnasoft  3) docker.io/khulnasoft
 # Usage: ./scripts/fast_pull_fallback.sh [compose-file] [--dry-run] [--up]
 #   --dry-run : only check, do not pull
 #   --up      : run docker compose up -d after successful pulls
@@ -44,7 +44,7 @@ CYBERPOT_VERSION="${CYBERPOT_VERSION:-24.04.2}"
 CYBERPOT_VERSION="${CYBERPOT_VERSION#=}"
 CYBERPOT_VERSION="${CYBERPOT_VERSION#=}"
 TIMEOUT="${TIMEOUT:-5}"
-REGISTRIES=("ghcr.io/khulnasoft-bot" "docker.io/khulnasoft" "ghcr.io/khulnasoft")
+REGISTRIES=("docker.io/khulnasoft")
 
 GREEN="\033[0;32m"
 YELLOW="\033[0;33m"
@@ -117,7 +117,7 @@ fi
 if [[ ${#IMAGES[@]} -eq 0 ]]; then
   # Fallback: parse compose file directly
   # Extract image: lines and expand ${CYBERPOT_REPO} manually
-  CYBERPOT_REPO_FALLBACK="${CYBERPOT_REPO:-ghcr.io/khulnasoft}"
+  CYBERPOT_REPO_FALLBACK="${CYBERPOT_REPO:-docker.io/khulnasoft}"
   while IFS= read -r line; do
     # line like "image: ${CYBERPOT_REPO}/adbhoney:${CYBERPOT_VERSION}"
     img=$(echo "$line" | sed -E 's/.*image:[[:space:]]*//; s/[[:space:]]*$//; s/"//g; s/'\''//g')
@@ -152,7 +152,7 @@ SKIPPED=0
 
 for original in "${IMAGES[@]}"; do
   # Extract base name (without registry) and tag
-  # original like ghcr.io/khulnasoft/adbhoney:24.04.2 or khulnasoft/adbhoney:24.04.2
+  # original like docker.io/khulnasoft/adbhoney:24.04.2 or khulnasoft/adbhoney:24.04.2
   # We want base = adbhoney, tag = 24.04.2
   base=$(basename "$original" | cut -d':' -f1)
   tag=$(echo "$original" | awk -F: '{print $NF}')

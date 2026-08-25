@@ -32,7 +32,7 @@ def main() -> int:
         return 1
 
     env = os.environ.copy()
-    env.setdefault("CYBERPOT_REPO", "ghcr.io/khulnasoft")
+    env.setdefault("CYBERPOT_REPO", "docker.io/khulnasoft")
     env.setdefault("CYBERPOT_VERSION", "24.04.2")
     env.setdefault("CYBERPOT_PULL_POLICY", "always")
     env.setdefault("CYBERPOT_DATA_PATH", "./data")

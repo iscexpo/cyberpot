@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fast pull check with registry fallback: khulnasoft-bot -> docker.io/khulnasoft -> ghcr.io/khulnasoft."""
+"""Fast pull check with registry fallback: khulnasoft-bot -> docker.io/khulnasoft -> docker.io/khulnasoft."""
 
 from __future__ import annotations
 
@@ -11,9 +11,7 @@ from pathlib import Path
 
 
 REGISTRIES = [
-    "ghcr.io/khulnasoft-bot",
     "docker.io/khulnasoft",
-    "ghcr.io/khulnasoft",
 ]
 
 DEFAULT_VERSION = "24.04.2"
@@ -52,7 +50,7 @@ def fast_manifest_check(image: str, timeout: int = 5) -> bool:
 def get_images(compose_file: Path, version: str) -> list[str]:
     env = os.environ.copy()
     env.setdefault("CYBERPOT_VERSION", version)
-    env.setdefault("CYBERPOT_REPO", "ghcr.io/khulnasoft")
+    env.setdefault("CYBERPOT_REPO", "docker.io/khulnasoft")
     env.setdefault("CYBERPOT_PULL_POLICY", "always")
     env.setdefault("CYBERPOT_DATA_PATH", "./data")
     env.setdefault("CYBERPOT_DOCKER_COMPOSE", str(compose_file))

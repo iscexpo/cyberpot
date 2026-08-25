@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tag_to_dockerhub.sh - Move all ghcr.io/khulnasoft images to docker.io/khulnasoft with new version tag
+# tag_to_dockerhub.sh - Move all docker.io/khulnasoft images to docker.io/khulnasoft with new version tag
 # Usage: ./scripts/tag_to_dockerhub.sh [new_version] [--push]
 #   new_version default: 24.04.2 (from version file)
 #   --push : also push to docker.io (requires docker login)
@@ -17,13 +17,13 @@ fi
 NEW_VERSION="${NEW_VERSION#=}"
 NEW_VERSION="${NEW_VERSION#=}"
 
-echo "=== Tagging ghcr.io/khulnasoft -> docker.io/khulnasoft ==="
+echo "=== Tagging docker.io/khulnasoft -> docker.io/khulnasoft ==="
 echo "New version: $NEW_VERSION"
 echo "Push: $PUSH"
 echo ""
 
 # Get unique IDs
-docker images --format "{{.ID}} {{.Repository}}:{{.Tag}}" | grep "ghcr.io/khulnasoft" | sort -u -k1,1 | while read -r id repo_tag; do
+docker images --format "{{.ID}} {{.Repository}}:{{.Tag}}" | grep "docker.io/khulnasoft" | sort -u -k1,1 | while read -r id repo_tag; do
   repo=$(echo "$repo_tag" | cut -d: -f1)
   tag=$(echo "$repo_tag" | cut -d: -f2)
   base=$(basename "$repo")
