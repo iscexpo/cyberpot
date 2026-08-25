@@ -85,8 +85,8 @@ test: ## Run unit tests
 	$(PYTHON) -m unittest discover -s tests -p 'test_*.py'
 
 lint: ## Lint shell & python
-	@echo "== shellcheck install.sh genuser.sh fast_pull =="
-	@shellcheck install.sh genuser.sh scripts/*.sh 2>&1 | head -n 50 || true
+	@echo "== shellcheck install.sh genuser.sh scripts/*.sh new-layout =="
+	@shellcheck install.sh genuser.sh scripts/*.sh scripts/build/*.sh scripts/check/*.sh scripts/registry/*.sh scripts/dotfiles/*.sh scripts/lib/*.sh 2>&1 | head -n 80 || true
 	@echo "== hadolint Dockerfiles (if available) =="
 	@command -v hadolint >/dev/null 2>&1 && hadolint docker/cyberpot-init/Dockerfile docker/dot-init/Dockerfile 2>&1 | head -n 20 || echo "hadolint not installed, skip"
 	@echo "== python compile =="
@@ -185,6 +185,18 @@ devcontainer-status: ## Show devcontainer status
 	bash scripts/setup_devcontainer.sh status
 
 # Basic
+tidy: ## Tidy repo (remove stale exports, sync version, lint)
+	@bash scripts/lib/version.py --write version 2>/dev/null || true
+	@make clean 2>/dev/null || true
+	@echo "== Git garbage collect =="
+	@git gc 2>/dev/null || true
+	@echo "== Remove old export files =="
+	@rm -f khulnasoft-bot.txt khulnasoft.txt khulnasoft-hub.txt khulnasoft-hub-full.json 2>/dev/null || true
+	@echo "== Symlink old script paths to new layout =="
+	@ln -sf scripts/lib/version.py scripts/lib/version.py 2>/dev/null || true
+	@ln -sf scripts/build/check_dangling_dockerfiles.sh scripts/check_dangling_dockerfiles.sh 2>/dev/null || true
+	@echo "All done — run: make validate && make lint"
+
 install: ## Run the install workflow
 	@echo "Running CyberPot install workflow..."
 	@bash ./install.sh

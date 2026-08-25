@@ -28,6 +28,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Fetch CyberPot version
+        run: echo "VERSION=$(python3 -c \"import yaml; print(yaml.safe_load(open('config/defaults.yml'))['version'])\")" >> "$GITHUB_ENV"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -85,7 +88,9 @@ jobs:
           context: ./docker/cyberpot-init
           file: ./docker/cyberpot-init/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+            ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
