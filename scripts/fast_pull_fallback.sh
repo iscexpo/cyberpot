@@ -184,11 +184,17 @@ for original in "${IMAGES[@]}"; do
     fi
   fi
 
+  # If original already present locally, use it directly (no pull needed) - fixes manifest unknown for not-yet-pushed 24.04.2
+  if sudo docker image inspect "$original" >/dev/null 2>&1 || docker image inspect "$original" >/dev/null 2>&1; then
+    echo -e "${GREEN}Checking $base:$tag (original: $original) — already present locally${NC}"
+    ((PULLED++)) || true
+    continue
+  fi
   echo -e "${YELLOW}Checking $base:$tag (original: $original)${NC}"
   FOUND=""
+  # Try original tag first
   for reg in "${REGISTRIES[@]}"; do
     candidate="${reg}/${base}:${tag}"
-    # Special case: docker.io prefix can be omitted (khulnasoft/<name> == docker.io/khulnasoft/<name>)
     alt_candidate=""
     if [[ "$reg" == "docker.io/khulnasoft" ]]; then
       alt_candidate="khulnasoft/${base}:${tag}"
@@ -206,9 +212,26 @@ for original in "${IMAGES[@]}"; do
       echo -e "${RED}missing${NC}"
     fi
   done
+  # Fallback to older tags if 24.04.2 not found (manifest unknown) - try 24.04.1, 24.04, latest
+  if [[ -z "$FOUND" && "$tag" == "24.04.2" ]]; then
+    for fallback_tag in "24.04.1" "24.04" "latest"; do
+      echo -e "${YELLOW}  Fallback trying tag $fallback_tag for $base${NC}"
+      for reg in "${REGISTRIES[@]}"; do
+        candidate="${reg}/${base}:${fallback_tag}"
+        echo -n "    trying $candidate ... "
+        if fast_check "$candidate"; then
+          echo -e "${GREEN}found${NC}"
+          FOUND="$candidate"
+          break 2
+        else
+          echo -e "${RED}missing${NC}"
+        fi
+      done
+    done
+  fi
 
   if [[ -z "$FOUND" ]]; then
-    echo -e "${RED}  ✗ All registries missing for $base:$tag${NC}"
+    echo -e "${RED}  ✗ All registries missing for $base:$tag (and fallbacks)${NC}"
     ((FAILED++)) || true
     continue
   fi

@@ -127,7 +127,11 @@ def main() -> int:
         tag = original.split(":")[-1] if ":" in original else version
         if "/" not in original or tag == original:
             tag = version
-        # skip non-khulnasoft? try anyway
+        # If original already present locally, skip pull (fixes manifest unknown for not-yet-pushed 24.04.2)
+        if run(["docker", "image", "inspect", original]).returncode == 0:
+            print(f"Checking {base}:{tag} (original: {original}) — already present locally")
+            pulled += 1
+            continue
         print(f"Checking {base}:{tag} (original: {original})")
         found = None
         for reg in REGISTRIES:
@@ -146,8 +150,23 @@ def main() -> int:
                 break
             else:
                 print("missing")
+        # Fallback to older tags if 24.04.2 not found
+        if not found and tag == "24.04.2":
+            for fallback_tag in ["24.04.1", "24.04", "latest"]:
+                print(f"  Fallback trying tag {fallback_tag} for {base}")
+                for reg in REGISTRIES:
+                    candidate = f"{reg}/{base}:{fallback_tag}"
+                    print(f"    trying {candidate} ... ", end="", flush=True)
+                    if fast_manifest_check(candidate, timeout=args.timeout):
+                        print("found")
+                        found = candidate
+                        break
+                    else:
+                        print("missing")
+                if found:
+                    break
         if not found:
-            print(f"  ✗ All registries missing for {base}:{tag}")
+            print(f"  ✗ All registries missing for {base}:{tag} (and fallbacks)")
             failed += 1
             continue
         if args.dry_run:
