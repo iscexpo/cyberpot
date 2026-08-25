@@ -29,7 +29,7 @@ jobs:
           persist-credentials: false
 
       - name: Fetch CyberPot version
-        run: echo "VERSION=$(python3 -c \"import yaml; print(yaml.safe_load(open('config/defaults.yml'))['version'])\")" >> "$GITHUB_ENV"
+        run: echo "VERSION=$(python3 -c 'import yaml; print(yaml.safe_load(open("config/defaults.yml"))["version"])')" >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
