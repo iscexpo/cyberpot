@@ -4,7 +4,7 @@ PYTHON ?= python3
 GREEN := \033[0;32m
 NC := \033[0m
 
-.PHONY: help setup validate test preset health install update uninstall build-images analyze-structure devcontainer devcontainer-up devcontainer-down devcontainer-shell devcontainer-status
+.PHONY: help setup validate test preset health install update uninstall build-images analyze-structure devcontainer devcontainer-up devcontainer-down devcontainer-shell devcontainer-status generate-strategy check-dangling
 
 help: ## Show this help message
 	@echo ''
@@ -29,6 +29,8 @@ help: ## Show this help message
 	@echo "    Usage: make preset PRESET=standard OUTPUT=./docker-compose.yml"
 	@echo "  $(GREEN)make build-images$(NC)  - Build images (iso, virtualbox, vmware)"
 	@echo "    Usage: make build-images TARGET=iso OUTPUT_DIR=./build/images"
+	@echo "  $(GREEN)make generate-strategy$(NC) - Generate Docker build strategy from legit images"
+	@echo "  $(GREEN)make check-dangling$(NC)    - Find dangling Dockerfiles not in strategy"
 	@echo ''
 	@echo "$(GREEN)Devcontainer Commands:$(NC)"
 	@echo "  $(GREEN)make devcontainer$(NC)        - Build and start devcontainer"
@@ -76,6 +78,14 @@ build-images: ## Build images (requires TARGET: iso, virtualbox, vmware)
 	@if [ -z "$(TARGET)" ]; then echo "Usage: make build-images TARGET=iso OUTPUT_DIR=./build/images"; exit 2; fi
 	@if [ "$(TARGET)" != "iso" ] && [ "$(TARGET)" != "virtualbox" ] && [ "$(TARGET)" != "vmware" ]; then echo "Invalid TARGET: $(TARGET). Must be: iso, virtualbox, vmware"; exit 2; fi
 	$(PYTHON) scripts/build_images.py --target $(TARGET) --output-dir $(if $(OUTPUT_DIR),$(OUTPUT_DIR),./build/images) --dry-run
+
+generate-strategy: ## Generate Docker build strategy from legit images
+	$(PYTHON) scripts/generate_docker_strategy.py
+
+check-dangling: ## Find dangling Dockerfiles (requires strategy JSON via STRATEGY env or file)
+	@$(PYTHON) scripts/generate_docker_strategy.py > /tmp/strategy.json
+	@echo "Generated strategy with $$(jq '.matrix.include | length' /tmp/strategy.json) images"
+	@bash scripts/check_dangling_dockerfiles.sh /tmp/strategy.json || (echo "Dangling found (see above)"; exit 1)
 
 devcontainer: ## Build and start devcontainer
 	bash scripts/setup_devcontainer.sh up
