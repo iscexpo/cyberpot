@@ -19,6 +19,7 @@ env:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'khulnasoft' || github.repository_owner == 'khulnasoft-bot'
     permissions:
       contents: read
 
@@ -27,6 +28,9 @@ jobs:
         uses: actions/checkout@v5
         with:
           persist-credentials: false
+
+      - name: Fetch CyberPot version
+        run: echo "VERSION=$(python3 -c 'import yaml; print(yaml.safe_load(open("config/defaults.yml"))["version"])')" >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -48,6 +52,7 @@ jobs:
   publish:
     if: github.event_name != 'pull_request'
     needs: build-test
+    if: github.repository_owner == 'khulnasoft' || github.repository_owner == 'khulnasoft-bot'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -85,7 +90,9 @@ jobs:
           context: ./docker/cyberpot-init
           file: ./docker/cyberpot-init/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+            ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
