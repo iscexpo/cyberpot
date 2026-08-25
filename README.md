@@ -103,7 +103,7 @@ env bash -c "$(curl -sL https://github.com/khulnasoft/cyberpot/raw/master/instal
 
 CyberPot's main components have been moved into the `cyberpot-init` Docker image allowing CyberPot to now support multiple Linux distributions, even macOS and Windows (although both limited to the feature set of Docker Desktop). CyberPot uses [docker](https://www.docker.com/) and [docker compose](https://docs.docker.com/compose/) to reach its goal of running as many honeypots and tools as possible simultaneously and thus utilizing the host's hardware to its maximum.
 
-The container image for the initialization layer is published to GitHub Container Registry as `ghcr.io/khulnasoft/cyberpot-init`. You can pull it directly with `docker pull ghcr.io/khulnasoft/cyberpot-init:latest`.
+The container image for the initialization layer is published to GitHub Container Registry as `ghcr.io/khulnasoft-bot/cyberpot-init`. You can pull it directly with `docker pull ghcr.io/khulnasoft-bot/cyberpot-init:latest`.
 <br><br>
 
 CyberPot offers docker images for the following honeypots ...
@@ -140,7 +140,7 @@ CyberPot offers docker images for the following honeypots ...
 - [Elastic Stack](https://www.elastic.co/videos) to beautifully visualize all the events captured by CyberPot.
 - [Elasticvue](https://github.com/cars10/elasticvue/) a web front end for browsing and interacting with an Elasticsearch cluster.
 - [Fatt](https://github.com/0x4D31/fatt) a pyshark based script for extracting network metadata and fingerprints from pcap files and live network traffic.
-- [CyberPot-Attack-Map](https://github.com/khulnasoft-lab/cyberpot-attack-map) a beautifully animated attack map for CyberPot.
+- [CyberPot-Attack-Map](https://github.com/khulnasoft/cyberpot-attack-map) a beautifully animated attack map for CyberPot.
 - [P0f](https://lcamtuf.coredump.cx/p0f3/) is a tool for purely passive traffic fingerprinting.
 - [Spiderfoot](https://github.com/smicallef/spiderfoot) an open source intelligence automation tool.
 - [Suricata](https://suricata.io/) a Network Security Monitoring engine.
@@ -316,7 +316,7 @@ Once you are familiar with how things work you should choose a network you suspe
 | [Fedora Server 40 Network Install](https://fedoraproject.org/server/download)      | [download](https://download.fedoraproject.org/pub/fedora/linux/releases/40/Server/x86_64/iso/Fedora-Server-netinst-x86_64-40-1.14.iso) | [download](https://download.fedoraproject.org/pub/fedora/linux/releases/40/Server/aarch64/iso/Fedora-Server-netinst-aarch64-40-1.14.iso) |
 | [OpenSuse Tumbleweed Network Image](https://get.opensuse.org/tumbleweed/#download) | [download](https://download.opensuse.org/tumbleweed/iso/openSUSE-Tumbleweed-NET-x86_64-Current.iso)                                    | [download](https://download.opensuse.org/ports/aarch64/tumbleweed/iso/openSUSE-Tumbleweed-NET-aarch64-Current.iso)                       |
 | [Rocky Linux OS 9.4 Boot ISO](https://rockylinux.org/download)                     | [download](https://download.rockylinux.org/pub/rocky/9.4/isos/x86_64/Rocky-9.4-x86_64-boot.iso)                                        | [download](https://download.rockylinux.org/pub/rocky/9.4/isos/aarch64/Rocky-9.4-aarch64-boot.iso)                                        |
-| [Ubuntu 24.04 Live Server](https://ubuntu.com/download/server)                     | [download](https://releases.ubuntu.com/24.04/ubuntu-24.04.1-live-server-amd64.iso)                                                     | [download](https://cdimage.ubuntu.com/releases/24.04/release/ubuntu-24.04.1-live-server-arm64.iso)                                       |
+| [Ubuntu 24.04 Live Server](https://ubuntu.com/download/server)                     | [download](https://releases.ubuntu.com/24.04/ubuntu-latest-live-server-amd64.iso)                                                     | [download](https://cdimage.ubuntu.com/releases/24.04/release/ubuntu-latest-live-server-arm64.iso)                                       |
 
 <br>
 
