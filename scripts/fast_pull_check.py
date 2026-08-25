@@ -11,7 +11,9 @@ from pathlib import Path
 
 
 REGISTRIES = [
+    "ghcr.io/khulnasoft-bot",
     "docker.io/khulnasoft",
+    "ghcr.io/khulnasoft",
 ]
 
 DEFAULT_VERSION = "24.04.2"

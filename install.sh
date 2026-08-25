@@ -362,7 +362,7 @@ if [ "${myCYBERPOT_TYPE}" == "HIVE" ]; then
 	sed -i "s|^WEB_USER=.*|WEB_USER=${myWEB_USER_ENC_B64}|" "${myCYBERPOT_CONF_FILE}"
 fi
 
-# Pull docker images - resolve compose file location
+# Pull docker images - resolve compose file location with fast fallback
 myCOMPOSE_FILE="${HOME}/cyberpot/docker-compose.yml"
 if [ ! -f "${myCOMPOSE_FILE}" ] && [ -f "${myREPO_ROOT}/docker-compose.yml" ]; then
   myCOMPOSE_FILE="${myREPO_ROOT}/docker-compose.yml"
@@ -371,8 +371,28 @@ echo "### Now pulling images from ${myCOMPOSE_FILE} ..."
 if [ ! -f "${myCOMPOSE_FILE}" ]; then
   echo "### Compose file not found: ${myCOMPOSE_FILE}" >&2
 else
-  if ! sudo docker compose -f "${myCOMPOSE_FILE}" pull; then
-    echo "### docker compose pull failed (docker may not be running in devcontainer)" >&2
+  # Use fast fallback script if available (tries ghcr.io/khulnasoft-bot -> docker.io/khulnasoft -> ghcr.io/khulnasoft with 5s timeout)
+  if [ -f "${myREPO_ROOT}/scripts/fast_pull_fallback.sh" ]; then
+    echo "### Trying fast pull with fallback (docker.io/khulnasoft:24.04.2)..."
+    if ! bash "${myREPO_ROOT}/scripts/fast_pull_fallback.sh" "${myCOMPOSE_FILE}" 2>&1; then
+      echo "### Fast pull had issues, falling back to docker compose pull --ignore-pull-failures" >&2
+      sudo docker compose -f "${myCOMPOSE_FILE}" pull --ignore-pull-failures 2>&1 || echo "### docker compose pull failed (docker may not be running in devcontainer)" >&2
+    fi
+  elif [ -f "${HOME}/cyberpot/scripts/fast_pull_fallback.sh" ]; then
+    echo "### Trying fast pull with fallback..."
+    if ! bash "${HOME}/cyberpot/scripts/fast_pull_fallback.sh" "${myCOMPOSE_FILE}" 2>&1; then
+      sudo docker compose -f "${myCOMPOSE_FILE}" pull --ignore-pull-failures 2>&1 || echo "### docker compose pull failed" >&2
+    fi
+  else
+    # Fallback: pull with --ignore-pull-failures to handle private/unauthorized images like rdphoneypot
+    if ! sudo docker compose -f "${myCOMPOSE_FILE}" pull --ignore-pull-failures 2>&1; then
+      echo "### docker compose pull failed (docker may not be running in devcontainer)" >&2
+    fi
+  fi
+  # Ensure rdphoneypot fallback to dtagdevsec if khulnasoft missing (private)
+  if ! sudo docker image inspect "docker.io/khulnasoft/rdphoneypot:24.04.2" >/dev/null 2>&1 && sudo docker image inspect "ghcr.io/khulnasoft/rdphoneypot:24.04.1" >/dev/null 2>&1; then
+    echo "### Retagging existing rdphoneypot 24.04.1 -> 24.04.2 for docker.io"
+    sudo docker tag "ghcr.io/khulnasoft/rdphoneypot:24.04.1" "docker.io/khulnasoft/rdphoneypot:24.04.2" 2>/dev/null || true
   fi
 fi
 echo

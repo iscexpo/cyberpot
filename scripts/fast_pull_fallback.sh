@@ -44,7 +44,7 @@ CYBERPOT_VERSION="${CYBERPOT_VERSION:-24.04.2}"
 CYBERPOT_VERSION="${CYBERPOT_VERSION#=}"
 CYBERPOT_VERSION="${CYBERPOT_VERSION#=}"
 TIMEOUT="${TIMEOUT:-5}"
-REGISTRIES=("docker.io/khulnasoft")
+REGISTRIES=("ghcr.io/khulnasoft-bot" "docker.io/khulnasoft" "ghcr.io/khulnasoft")
 
 GREEN="\033[0;32m"
 YELLOW="\033[0;33m"
@@ -219,6 +219,13 @@ for original in "${IMAGES[@]}"; do
     continue
   fi
 
+  # Skip pull if image already present locally
+  if sudo docker image inspect "$FOUND" >/dev/null 2>&1 || docker image inspect "$FOUND" >/dev/null 2>&1; then
+    echo -e "${GREEN}  ✓ already present locally: $FOUND${NC}"
+    if [[ "$FOUND" != "$original" ]]; then docker tag "$FOUND" "$original" 2>/dev/null || sudo docker tag "$FOUND" "$original" 2>/dev/null || true; fi
+    ((PULLED++)) || true
+    continue
+  fi
   echo -e "${GREEN}  → pulling $FOUND${NC}"
   if timeout 300 docker pull "$FOUND"; then
     if [[ "$FOUND" != "$original" ]]; then
