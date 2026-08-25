@@ -4,7 +4,7 @@ PYTHON ?= python3
 GREEN := \033[0;32m
 NC := \033[0m
 
-.PHONY: help setup validate test preset health install update uninstall build-images analyze-structure devcontainer devcontainer-up devcontainer-down devcontainer-shell devcontainer-status generate-strategy check-dangling cyberpot-init cyberpot-init-push setup-buildx
+.PHONY: help setup validate test preset health install update uninstall build-images analyze-structure devcontainer devcontainer-up devcontainer-down devcontainer-shell devcontainer-status generate-strategy check-dangling cyberpot-init cyberpot-init-push setup-buildx dotfiles dotfiles-xdg dot-init
 
 help: ## Show this help message
 	@echo ''
@@ -34,6 +34,11 @@ help: ## Show this help message
 	@echo "  $(GREEN)make cyberpot-init$(NC)     - Build cyberpot-init via bake (canonical)"
 	@echo "  $(GREEN)make cyberpot-init-push$(NC)- Build & push cyberpot-init"
 	@echo "  $(GREEN)make setup-buildx$(NC)      - Setup buildx + QEMU (canonical)"
+	@echo ''
+	@echo "$(GREEN)Dotfiles Commands:$(NC)"
+	@echo "  $(GREEN)make dotfiles$(NC)            - Setup ~/.cyberpot dotfiles (stow/chezmoi)"
+	@echo "  $(GREEN)make dotfiles-xdg$(NC)        - Setup dotfiles with XDG compliance"
+	@echo "  $(GREEN)make dot-init$(NC)            - Build dot-init (dynamic init, replaces cyberpot-init)"
 	@echo ''
 	@echo "$(GREEN)Devcontainer Commands:$(NC)"
 	@echo "  $(GREEN)make devcontainer$(NC)        - Build and start devcontainer"
@@ -98,6 +103,20 @@ cyberpot-init-push: ## Build & push cyberpot-init
 
 setup-buildx: ## Setup buildx + QEMU (canonical)
 	bash scripts/setup_buildx.sh
+
+dotfiles: ## Setup dotfiles (dot-init)
+	bash scripts/dotfiles_setup.sh install || true
+	@bash scripts/dotfiles_setup.sh status || true
+
+dotfiles-xdg: ## Setup dotfiles with XDG
+	bash scripts/dotfiles_setup.sh xdg || true
+	@bash scripts/dotfiles_setup.sh status || true
+
+dot-init: ## Build dot-init (dynamic init, replaces cyberpot-init)
+	@echo "Building dot-init (dynamic init)..."
+	@bash scripts/setup_buildx.sh >/dev/null 2>&1 || true
+	@docker buildx bake --print dot-init >/dev/null 2>&1 && echo "dot-init bake ok" || echo "dot-init bake check failed, ensure buildx"
+	@bash scripts/dotfiles_setup.sh status || true
 
 devcontainer: ## Build and start devcontainer
 	bash scripts/setup_devcontainer.sh up

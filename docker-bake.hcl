@@ -16,11 +16,11 @@ variable "REGISTRY_GHCR" {
 }
 
 group "default" {
-  targets = ["cyberpot-init"]
+  targets = ["cyberpot-init", "dot-init"]
 }
 
 group "all" {
-  targets = ["cyberpot-init"]
+  targets = ["cyberpot-init", "dot-init"]
 }
 
 target "_common" {
@@ -47,6 +47,28 @@ target "cyberpot-init" {
   ]
   labels = {
     "org.opencontainers.image.title" = "cyberpot-init"
+    "org.opencontainers.image.version" = CYBERPOT_VERSION
+    "org.opencontainers.image.source" = "https://github.com/khulnasoft/cyberpot"
+  }
+  output = ["type=image,push=false"]
+}
+
+target "dot-init" {
+  inherits = ["_common"]
+  context = "docker/dot-init"
+  dockerfile = "Dockerfile"
+  args = {
+    CYBERPOT_VERSION = CYBERPOT_VERSION
+  }
+  tags = [
+    "${REGISTRY_DOCKERHUB}/dot-init:${CYBERPOT_VERSION}",
+    "${REGISTRY_DOCKERHUB}/dot-init:latest",
+    "${REGISTRY_DOCKERHUB}/dynamic-init:${CYBERPOT_VERSION}",
+    "${REGISTRY_GHCR}/dot-init:${CYBERPOT_VERSION}"
+  ]
+  labels = {
+    "org.opencontainers.image.title" = "dot-init"
+    "org.opencontainers.image.description" = "CyberPot dynamic init via dotfiles (XDG, stow, chezmoi)"
     "org.opencontainers.image.version" = CYBERPOT_VERSION
     "org.opencontainers.image.source" = "https://github.com/khulnasoft/cyberpot"
   }
