@@ -50,9 +50,8 @@ jobs:
           docker run --rm --entrypoint /bin/sh local/cyberpot-init:test -c 'test -f /opt/cyberpot/entrypoint.sh && test -d /opt/cyberpot'
 
   publish:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && (github.repository_owner == 'khulnasoft' || github.repository_owner == 'khulnasoft-bot')
     needs: build-test
-    if: github.repository_owner == 'khulnasoft' || github.repository_owner == 'khulnasoft-bot'
     runs-on: ubuntu-latest
     permissions:
       contents: read
