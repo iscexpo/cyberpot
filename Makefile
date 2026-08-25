@@ -4,7 +4,7 @@ PYTHON ?= python3
 GREEN := \033[0;32m
 NC := \033[0m
 
-.PHONY: help setup validate test preset health install update uninstall build-images analyze-structure devcontainer devcontainer-up devcontainer-down devcontainer-shell devcontainer-status generate-strategy check-dangling
+.PHONY: help setup validate test preset health install update uninstall build-images analyze-structure devcontainer devcontainer-up devcontainer-down devcontainer-shell devcontainer-status generate-strategy check-dangling cyberpot-init cyberpot-init-push setup-buildx
 
 help: ## Show this help message
 	@echo ''
@@ -31,6 +31,9 @@ help: ## Show this help message
 	@echo "    Usage: make build-images TARGET=iso OUTPUT_DIR=./build/images"
 	@echo "  $(GREEN)make generate-strategy$(NC) - Generate Docker build strategy from legit images"
 	@echo "  $(GREEN)make check-dangling$(NC)    - Find dangling Dockerfiles not in strategy"
+	@echo "  $(GREEN)make cyberpot-init$(NC)     - Build cyberpot-init via bake (canonical)"
+	@echo "  $(GREEN)make cyberpot-init-push$(NC)- Build & push cyberpot-init"
+	@echo "  $(GREEN)make setup-buildx$(NC)      - Setup buildx + QEMU (canonical)"
 	@echo ''
 	@echo "$(GREEN)Devcontainer Commands:$(NC)"
 	@echo "  $(GREEN)make devcontainer$(NC)        - Build and start devcontainer"
@@ -86,6 +89,15 @@ check-dangling: ## Find dangling Dockerfiles (requires strategy JSON via STRATEG
 	@$(PYTHON) scripts/generate_docker_strategy.py > /tmp/strategy.json
 	@echo "Generated strategy with $$(jq '.matrix.include | length' /tmp/strategy.json) images"
 	@bash scripts/check_dangling_dockerfiles.sh /tmp/strategy.json || (echo "Dangling found (see above)"; exit 1)
+
+cyberpot-init: ## Build cyberpot-init via bake (canonical)
+	bash scripts/build_cyberpot_init.sh
+
+cyberpot-init-push: ## Build & push cyberpot-init
+	bash scripts/build_cyberpot_init.sh --push
+
+setup-buildx: ## Setup buildx + QEMU (canonical)
+	bash scripts/setup_buildx.sh
 
 devcontainer: ## Build and start devcontainer
 	bash scripts/setup_devcontainer.sh up

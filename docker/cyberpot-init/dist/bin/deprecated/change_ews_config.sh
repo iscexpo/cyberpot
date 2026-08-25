@@ -3,9 +3,9 @@
 echo """
 
 ##############################
-# CYPERPOT DTAG Data Submission #
+# CYPERPOT CTAG Data Submission #
 # Contact:                   #
-# cert@telekom.de            # 
+# security@khulnasoft.com            # 
 ##############################
 """
 
